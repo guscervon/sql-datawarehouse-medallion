@@ -1,0 +1,12 @@
+services:
+  db:
+    image: postgres:17.5
+    container_name: datawarehouse
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: datawarehouse
+    ports:
+      - "5432:5432"
+    tmpfs:
+      - /var/lib/potgresql/data
