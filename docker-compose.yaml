@@ -1,6 +1,8 @@
 services:
   db:
     image: postgres:17.5
+    volumes:
+      - ./datasets:/datasets
     container_name: datawarehouse
     environment:
       POSTGRES_USER: postgres
