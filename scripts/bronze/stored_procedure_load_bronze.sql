@@ -35,6 +35,7 @@ BEGIN
     v_duration_table := v_end_time_table - v_start_time_table;
     RAISE NOTICE 'Duration of loading bronze.crm_cust_info: %', v_duration_table;
 
+    RAISE NOTICE '-----------------------------------';
 
     v_start_time_table := CLOCK_TIMESTAMP();
     RAISE NOTICE 'Truncating Table bronze.crm_prd_info';
@@ -49,6 +50,7 @@ BEGIN
     v_duration_table := v_end_time_table - v_start_time_table;
     RAISE NOTICE 'Duration of loading bronze.crm_prd_info: %', v_duration_table;
 
+    RAISE NOTICE '-----------------------------------';
 
     v_start_time_table := CLOCK_TIMESTAMP();
     RAISE NOTICE 'Truncating Table bronze.crm_sales_details';
@@ -81,6 +83,8 @@ BEGIN
     v_duration_table := v_end_time_table - v_start_time_table;
     RAISE NOTICE 'Duration of loading bronze.erp_cust_az12: %', v_duration_table;
 
+    RAISE NOTICE '-----------------------------------';
+
     v_start_time_table := CLOCK_TIMESTAMP();
     RAISE NOTICE 'Truncating Table bronze.erp_loc_a101';
     TRUNCATE TABLE bronze.erp_loc_a101;
@@ -93,6 +97,8 @@ BEGIN
 
     v_duration_table := v_end_time_table - v_start_time_table;
     RAISE NOTICE 'Duration of loading bronze.erp_loc_a101: %', v_duration_table;
+
+    RAISE NOTICE '-----------------------------------';
 
     v_start_time_table := CLOCK_TIMESTAMP();
     RAISE NOTICE 'Truncating Table bronze.erp_px_cat_g1v2';
@@ -107,6 +113,7 @@ BEGIN
     v_duration_table := v_end_time_table - v_start_time_table;
     RAISE NOTICE 'Duration of loading bronze.erp_px_cat_g1v2: %', v_duration_table;
 
+    RAISE NOTICE '-----------------------------------';
 
     v_end_time := CLOCK_TIMESTAMP();
     v_duration := v_end_time - v_start_time;
