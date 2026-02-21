@@ -45,3 +45,7 @@ PGPASSWORD=mypassword psql -h localhost -p 5432 -U postgres -d datawarehouse
 ```bash
 PGPASSWORD=mypassword psql -h localhost -p 5432 -U postgres -d datawarehouse -f scripts/schemas.sql
 ```
+
+## Bronze Layer
+
+![Bronze Layer](./assets/bronze_layer_diagram.svg)
