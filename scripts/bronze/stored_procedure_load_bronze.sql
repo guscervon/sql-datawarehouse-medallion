@@ -119,6 +119,11 @@ BEGIN
     v_duration := v_end_time - v_start_time;
     RAISE NOTICE 'Duration of loading Bronze Layer: %', v_duration;
 
+
+    RAISE NOTICE '===================================';
+    RAISE NOTICE 'Finish Loading Bronze Layer';
+    RAISE NOTICE '===================================';
+
 EXCEPTION
     WHEN OTHERS THEN
         RAISE EXCEPTION 'Error loading Bronze Layer: %', SQLERRM;
