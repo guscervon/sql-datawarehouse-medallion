@@ -6,6 +6,10 @@ readonly BRONZE_LAYER_SCRIPTS=(
   "./scripts/bronze/ddl.sql"
   "./scripts/bronze/stored_procedure_load_bronze.sql"
 )
+readonly SILVER_LAYER_SCRIPTS=(
+  "./scripts/silver/ddl.sql"
+  "./scripts/silver/stored_procedure_load_silver.sql"
+)
 
 # Check if .env file exists and load environment variables
 if [ -f .env ]; then
@@ -53,5 +57,21 @@ for FILE in "${BRONZE_LAYER_SCRIPTS[@]}"; do
     exit 1
   fi
 done
-
 psql "$DATABASE_URL" -c "CALL bronze.sp_load_bronze();"
+
+echo "Loading Silver Layer and Data"
+for FILE in "${SILVER_LAYER_SCRIPTS[@]}"; do
+  if [ -f "$FILE" ]; then
+    echo "Executing $FILE"
+    psql "$DATABASE_URL" -f "$FILE"
+  else
+    echo "File not found: $FILE"
+
+    echo "Turning down docker compose"
+    docker compose stop
+    docker compose down
+    exit 1
+  fi
+done
+
+psql "$DATABASE_URL" -c "CALL silver.sp_load_silver_data();"
