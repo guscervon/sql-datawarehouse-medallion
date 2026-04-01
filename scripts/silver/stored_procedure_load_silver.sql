@@ -157,8 +157,8 @@ BEGIN
         WHEN (CURRENT_DATE - bdate :: date) / 365 > 100 THEN NULL
       ELSE bdate:: date END AS bdate,
       CASE
-        WHEN TRIM(UPPER(gen)) IN ('F', 'FEMALE') THEN 'FEMALE'
-        WHEN TRIM(UPPER(gen)) IN ('M', 'MALE') THEN 'MALE'
+        WHEN TRIM(UPPER(gen)) IN ('F', 'FEMALE') THEN 'Female'
+        WHEN TRIM(UPPER(gen)) IN ('M', 'MALE') THEN 'Male'
       ELSE 'n/a' END AS gen
     FROM
       bronze.erp_cust_az12;
