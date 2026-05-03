@@ -1,67 +1,55 @@
+/*
+DDL Script: Create gold tables
+*/
 
-CREATE OR REPLACE VIEW gold.dim_customers AS
-SELECT
-  ROW_NUMBER() OVER(ORDER BY cci.cst_id) AS customer_key, --surrogate_key use for connect our data without depend of the source
-  cci.cst_id AS customer_id,
-  cci.cst_key AS customer_number,
-  cci.cst_firstname AS first_name,
-  cci.cst_lastname AS last_name,
-  ela.cntry AS country,
-  cci.cst_martial_status AS marital_status,
-  CASE
-    WHEN cci.cst_gndr != 'n/a' THEN cci.cst_gndr
-    ELSE COALESCE(eca.gen, 'n/a')
-  END AS gender,
-  eca.bdate AS birthday,
-  cci.cst_create_date AS created_at
-FROM
-  silver.crm_cust_info cci
-LEFT JOIN silver.erp_cust_az12 eca
-ON
-  cci.cst_key = eca.cid
-LEFT JOIN silver.erp_loc_a101 ela
-ON
-  cci.cst_key = ela.cid;
+-- In each table is added dwh_created_at for auditoon
 
-CREATE OR REPLACE VIEW gold.dim_products AS
-SELECT
-  ROW_NUMBER() OVER(ORDER BY cpi.prd_id) AS product_key,
-  cpi.prd_id AS product_id,
-  cpi.prd_key AS product_number,
-  cpi.prd_nm AS product_name,
-  cpi.cat_id AS category_id,
-  epcg.cat AS category,
-  epcg.subcat AS subcategory,
-  epcg.maintenance,
-  cpi.prd_cost AS cot,
-  cpi.prd_line AS product_line,
-  cpi.prd_start_dt AS start_date
-FROM
-  silver.crm_prd_info cpi
-LEFT JOIN silver.erp_px_cat_g1v2 epcg
-ON
-  epcg.id = cpi.cat_id
-WHERE
-  cpi.prd_end_dt IS NULL; -- Getting only active prices
+------------------ DIMENSION TABLES --------------------------------
+CREATE TABLE IF NOT EXISTS gold.dim_customers (
+  customer_key CHAR(32) PRIMARY KEY NOT NULL,
+  customer_id INT NOT NULL,
+  customer_number VARCHAR(30),
+  first_name VARCHAR(100),
+  last_name VARCHAR(100),
+  country VARCHAR(30) NOT NULL,
+  marital_status VARCHAR(30) NOT NULL,
+  gender VARCHAR(30) NOT NULL,
+  birthday DATE,
+  created_at TIMESTAMP NOT NULL,
+  dwh_registered_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+COMMENT ON TABLE gold.dim_customers IS 'Master dimension for customers integrating CRM and ERP data using MD5 surrogate keys';
+
+CREATE TABLE IF NOT EXISTS gold.dim_products(
+  product_key CHAR(32) PRIMARY KEY NOT NULL,
+  product_id INT NOT NULL,
+  product_number VARCHAR(100) NOT NULL,
+  product_name VARCHAR(100)NOT NULL,
+  category_id VARCHAR(50) NOT NULL,
+  category VARCHAR(100),
+  subcategory VARCHAR(100),
+  maintenance VARCHAR(100),
+  cost DECIMAL(10, 2) NOT NULL,
+  product_line VARCHAR(100),
+  start_date DATE NOT NULL,
+  dwh_registered_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+COMMENT ON TABLE gold.dim_products IS 'Master dimension for products integrating CRM and ERP data using MD5 surrogate keys';
 
 
-CREATE OR REPLACE VIEW gold.fact_sales AS
-SELECT
-  csd.sls_ord_num AS order_number,
-  dp.product_key,
-  dc.customer_key,
-  csd.sls_order_dt AS order_date,
-  csd.sls_ship_dt AS shiping_date,
-  csd.sls_due_dt AS due_date,
-  csd.sls_sales AS sales_amount,
-  csd.sls_quantity AS quantity,
-  csd.sls_price AS price
-FROM
-  silver.crm_sales_details csd
-LEFT JOIN gold.dim_products dp
-ON
-  dp.product_number = csd.sls_prd_key
-LEFT JOIN gold.dim_customers dc
-ON
-  dc.customer_id = csd.sls_cust_id;
+------------------ FACT TABLES --------------------------------
+CREATE TABLE IF NOT EXISTS gold.fact_sales(
+  order_key CHAR(32) NOT NULL,
+  product_key CHAR(32) NOT NULL REFERENCES gold.dim_products(product_key),
+  customer_key CHAR(32) NOT NULL REFERENCES gold.dim_customers(customer_key),
+  order_number VARCHAR(50) NOT NULL,
+  order_date DATE,
+  shipping_date DATE,
+  due_date DATE,
+  sales_amount INT NOT NULL,
+  quantity INT NOT NULL,
+  price DECIMAL(10, 2) NOT NULL,
+  dwh_registered_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+COMMENT ON TABLE gold.fact_sales IS 'Master fact for customers and products integrating CRM and ERP data using MD5 surrogate keys';
 
