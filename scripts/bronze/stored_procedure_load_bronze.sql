@@ -30,6 +30,9 @@ BEGIN
     v_end_time_table := CLOCK_TIMESTAMP();
 
     GET DIAGNOSTICS v_row_count = ROW_COUNT;
+
+    PERFORM logs.fn_audit_table_quality('bronze', 'crm_cust_info', 'cst_id');
+
     RAISE NOTICE 'Loaded % rows into bronze.crm_cust_info', v_row_count;
 
     v_duration_table := v_end_time_table - v_start_time_table;
@@ -45,6 +48,9 @@ BEGIN
     v_end_time_table := CLOCK_TIMESTAMP();
 
     GET DIAGNOSTICS v_row_count = ROW_COUNT;
+
+    PERFORM logs.fn_audit_table_quality('bronze', 'crm_prd_info', 'prd_id');
+
     RAISE NOTICE 'Loaded % rows into bronze.crm_prd_info', v_row_count;
 
     v_duration_table := v_end_time_table - v_start_time_table;
@@ -60,6 +66,9 @@ BEGIN
     v_end_time_table := CLOCK_TIMESTAMP();
 
     GET DIAGNOSTICS v_row_count = ROW_COUNT;
+
+    PERFORM logs.fn_audit_table_quality('bronze', 'crm_sales_details', 'sls_ord_num');
+
     RAISE NOTICE 'Loaded % rows into bronze.crm_sales_details', v_row_count;
 
     v_duration_table := v_end_time_table - v_start_time_table;
@@ -78,6 +87,9 @@ BEGIN
     v_end_time_table := CLOCK_TIMESTAMP();
 
     GET DIAGNOSTICS v_row_count = ROW_COUNT;
+
+    PERFORM logs.fn_audit_table_quality('bronze', 'erp_cust_az12', 'cid');
+
     RAISE NOTICE 'Loaded % rows into bronze.erp_cust_az12', v_row_count;
 
     v_duration_table := v_end_time_table - v_start_time_table;
@@ -93,6 +105,9 @@ BEGIN
     v_end_time_table := CLOCK_TIMESTAMP();
 
     GET DIAGNOSTICS v_row_count = ROW_COUNT;
+
+    PERFORM logs.fn_audit_table_quality('bronze', 'erp_loc_a101', 'cid');
+
     RAISE NOTICE 'Loaded % rows into bronze.erp_loc_a101', v_row_count;
 
     v_duration_table := v_end_time_table - v_start_time_table;
@@ -108,6 +123,9 @@ BEGIN
     v_end_time_table := CLOCK_TIMESTAMP();
 
     GET DIAGNOSTICS v_row_count = ROW_COUNT;
+
+    PERFORM logs.fn_audit_table_quality('bronze', 'erp_px_cat_g1v2', 'id');
+
     RAISE NOTICE 'Loaded % rows into bronze.erp_px_cat_g1v2', v_row_count;
 
     v_duration_table := v_end_time_table - v_start_time_table;

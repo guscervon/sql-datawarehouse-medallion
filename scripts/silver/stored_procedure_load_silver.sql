@@ -27,11 +27,11 @@ BEGIN
     TRUNCATE TABLE silver.crm_cust_info;
 
     RAISE NOTICE 'Inserting data into silver.crm_cust_info from bronze.crm_cust_info';
-    INSERT INTO silver.crm_cust_info(cst_id, cst_key, cst_firstname, cst_lastname, cst_martial_status, cst_gndr, cst_create_date)
+    INSERT INTO silver.crm_cust_info(cst_id, cst_key, cst_firstname, cst_lastname, cst_marital_status, cst_gndr, cst_create_date)
     WITH cte_format_crm_cust_info AS (
       SELECT
         *,
-        ROW_NUMBER() OVER(PARTITION BY cst_id ORDER BY cst_martial_status DESC) AS rn_flag_last -- Column to identify last record for same id
+        ROW_NUMBER() OVER(PARTITION BY cst_id ORDER BY cst_marital_status DESC) AS rn_flag_last -- Column to identify last record for same id
       FROM
         bronze.crm_cust_info
       WHERE
@@ -43,14 +43,14 @@ BEGIN
       TRIM(cst_firstname) AS cst_firstname,
       TRIM(cst_lastname) AS cst_lastname,
       CASE
-        WHEN TRIM(UPPER(cst_martial_status)) = 'M' THEN 'Married'
-        WHEN TRIM(UPPER(cst_martial_status)) = 'S' THEN 'Single'
-        WHEN TRIM(UPPER(cst_martial_status)) IS NULL THEN 'N/A'
-      ELSE NULL END AS cst_martial_status, -- Normalize marital status
+        WHEN TRIM(UPPER(cst_marital_status)) = 'M' THEN 'Married'
+        WHEN TRIM(UPPER(cst_marital_status)) = 'S' THEN 'Single'
+        WHEN TRIM(UPPER(cst_marital_status)) IS NULL THEN 'n/a'
+      ELSE NULL END AS cst_marital_status, -- Normalize marital status
       CASE
         WHEN TRIM(UPPER(cst_gndr)) = 'M' THEN 'Male'
         WHEN TRIM(UPPER(cst_gndr)) = 'F' THEN 'Female'
-        WHEN TRIM(UPPER(cst_gndr)) IS NULL THEN 'N/A'
+        WHEN TRIM(UPPER(cst_gndr)) IS NULL THEN 'n/a'
       ELSE NULL END AS cst_gender, -- Normalize gender
       cst_create_date
     FROM
@@ -65,6 +65,8 @@ BEGIN
 
     v_duration_table := v_end_time_table - v_start_time_table;
     RAISE NOTICE 'Duration of loading silver.crm_cust_info data: %', v_duration_table;
+
+    -- PERFORM logs.fn_audit_business_rules('silver', 'crm_cust_info', 'INVALID_GENDER', 'prd_end_dt < prd_start_dt', 'WARNING');
 
     RAISE NOTICE '-----------------------------------';
 
@@ -97,6 +99,8 @@ BEGIN
 
     v_duration_table := v_end_time_table - v_start_time_table;
     RAISE NOTICE 'Duration of loading silver.crm_prd_info: %', v_duration_table;
+
+    PERFORM logs.fn_audit_business_rules('silver', 'crm_prd_info', 'INVALID_PRODUCT_DATE', 'prd_end_dt < prd_start_dt', 'WARNING');
 
     RAISE NOTICE '-----------------------------------';
 
@@ -137,6 +141,10 @@ BEGIN
     v_duration_table := v_end_time_table - v_start_time_table;
     RAISE NOTICE 'Duration of loading silver.crm_sales_details: %', v_duration_table;
 
+    PERFORM logs.fn_audit_business_rules('silver', 'crm_sales_details', 'INVALID_SALES', 'sls_sales != ABS(sls_quantity * sls_price)', 'WARNING');
+    PERFORM logs.fn_audit_business_rules('silver', 'crm_sales_details', 'INVALID_DATE_SALES', 'sls_ship_dt < sls_order_dt', 'WARNING');
+    
+
     RAISE NOTICE '-----------------------------------';
     RAISE NOTICE 'Loading ERP Tables';
     RAISE NOTICE '-----------------------------------';
@@ -171,6 +179,7 @@ BEGIN
     v_duration_table := v_end_time_table - v_start_time_table;
     RAISE NOTICE 'Duration of loading silver.erp_cust_az12: %', v_duration_table;
 
+    PERFORM logs.fn_audit_business_rules('silver', 'erp_cust_az12', 'INVALID_BIRTHDATE', 'bdate > CURRENT_DATE OR bdate < ''1920-01-01''', 'WARNING');
     RAISE NOTICE '-----------------------------------';
 
     v_start_time_table := CLOCK_TIMESTAMP();
