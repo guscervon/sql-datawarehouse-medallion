@@ -11,4 +11,4 @@ services:
     ports:
       - "5432:5432"
     tmpfs:
-      - /var/lib/potgresql/data
+      - /var/lib/postgresql/data
